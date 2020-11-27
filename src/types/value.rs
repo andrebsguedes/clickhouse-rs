@@ -242,6 +242,17 @@ where
     }
 }
 
+impl<T> convert::From<Vec<T>> for Value
+where
+    Value: convert::From<T>,
+    T: HasSqlType,
+{
+    fn from(value: Vec<T>) -> Value {
+        let default_type: SqlType = T::get_sql_type();
+        Value::Array(default_type.into(), Arc::new(value.into_iter().map(Into::into).collect()))
+    }
+}
+
 macro_rules! value_from {
     ( $( $t:ty : $k:ident ),* ) => {
         $(
@@ -284,9 +295,19 @@ impl convert::From<String> for Value {
     }
 }
 
-impl convert::From<Vec<u8>> for Value {
-    fn from(v: Vec<u8>) -> Value {
-        Value::String(Arc::new(v))
+// Needs specialization to land
+
+// impl convert::From<Vec<u8>> for Value {
+//     fn from(v: Vec<u8>) -> Value {
+//         Value::String(Arc::new(v))
+//     }
+// }
+
+pub struct Buffer(Vec<u8>);
+
+impl convert::From<Buffer> for Value {
+    fn from(b: Buffer) -> Value {
+        Value::String(Arc::new(b.0))
     }
 }
 
