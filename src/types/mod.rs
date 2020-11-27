@@ -196,6 +196,12 @@ has_sql_type! {
     DateTime<Tz>: SqlType::DateTime(DateTimeType::DateTime32)
 }
 
+impl<T> HasSqlType for Option<T> where T: HasSqlType {
+    fn get_sql_type() -> SqlType {
+        SqlType::Nullable(T::get_sql_type().into())
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub enum DateTimeType {
     DateTime32,
